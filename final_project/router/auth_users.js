@@ -55,11 +55,22 @@ regd_users.post("/login", (req,res) => {
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
     // access "customer" from index.js to get session username
-    const isbn = req.params.isbn;
-    const review = req.query.review;
-    const customer = req.body.username;
-    books[isbn].reviews = res.json({customer,review})
+    let isbn = req.params.isbn;
+    let review = req.query.review; 
+    let customer = req.session.authorization.username;
+    
+    books[isbn].reviews[customer] = review;
+    res.send("Updated book with ISBN "+isbn+" with review: "+review+" for user "+customer+" successfully");
 });
+
+regd_users.delete("/auth/review/:isbn",(req,res)=>{
+    let isbn = req.params.isbn;
+    let customer = req.session.authorization.username;
+    if(books[isbn].reviews[customer]){
+        delete books[isbn].reviews[customer]
+    }
+    res.send("Deleted review of book with ISBN "+isbn+" for user "+customer+" successfully");
+})
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
